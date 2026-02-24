@@ -15,7 +15,8 @@ if [[ ! -f "/usr/bin/g++-7"  ]]; then
 fi
 
 if [[ ! -d "ColmapForVisSat" ]]; then
-    git clone https://github.com/Kai-46/ColmapForVisSat.git
+    # git clone https://github.com/Kai-46/ColmapForVisSat.git
+    git clone -b run_on_runpod https://github.com/HikosakaRyo/SatelliteSfM.git
 fi
 
 CC=/usr/bin/gcc-7 CXX=/usr/bin/g++-7 \
