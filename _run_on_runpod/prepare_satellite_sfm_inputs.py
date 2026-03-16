@@ -145,17 +145,14 @@ def load_acquisition_dates(metadata_json_path):
     return date_map
 
 
-def find_metadata_json(tif_dir):
+def find_metadata_jsons(tif_dir):
     """
-    tif_dir 内の *_metadata.json を自動検索する。
+    tif_dir 内の *_metadata.json を全て検索して返す。
 
     Returns:
-        見つかったパス、なければ None
+        見つかったパスのリスト（空リストの場合もあり）
     """
-    candidates = sorted(glob.glob(os.path.join(tif_dir, "*_metadata.json")))
-    if candidates:
-        return candidates[0]
-    return None
+    return sorted(glob.glob(os.path.join(tif_dir, "*_metadata.json")))
 
 
 def _match_tif_to_date(tif_basename, date_map):
@@ -447,14 +444,18 @@ def main():
     print(f"  Copy mode      : {'symlink (scaling disabled)' if args.symlink else 'copy'}")
 
     # --- メタデータJSON の検索・読み込み ---
-    metadata_json = args.metadata_json
-    if metadata_json is None:
-        metadata_json = find_metadata_json(args.tif_dir)
     date_map = {}
-    if metadata_json and os.path.exists(metadata_json):
-        date_map = load_acquisition_dates(metadata_json)
-        print(f"  Metadata JSON  : {metadata_json}")
-        print(f"  NITF_IDATIM    : {len(date_map)} image(s) mapped")
+    if args.metadata_json:
+        metadata_jsons = [args.metadata_json]
+    else:
+        metadata_jsons = find_metadata_jsons(args.tif_dir)
+    if metadata_jsons:
+        for mj in metadata_jsons:
+            if os.path.exists(mj):
+                dm = load_acquisition_dates(mj)
+                date_map.update(dm)
+                print(f"  Metadata JSON  : {mj} ({len(dm)} image(s))")
+        print(f"  NITF_IDATIM    : {len(date_map)} image(s) mapped total")
     else:
         print(f"  Metadata JSON  : not found (NITF_IDATIM will not be embedded)")
 
